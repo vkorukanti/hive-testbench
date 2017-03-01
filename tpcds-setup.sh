@@ -54,13 +54,13 @@ if [ $SCALE -eq 1 ]; then
 fi
 
 # Do the actual data load.
-hdfs dfs -mkdir -p ${DIR}
-hdfs dfs -ls ${DIR}/${SCALE} > /dev/null
+hadoop fs -mkdir -p ${DIR}
+hadoop fs -ls ${DIR}/${SCALE} > /dev/null
 if [ $? -ne 0 ]; then
 	echo "Generating data at scale factor $SCALE."
 	(cd tpcds-gen; hadoop jar target/*.jar -d ${DIR}/${SCALE}/ -s ${SCALE})
 fi
-hdfs dfs -ls ${DIR}/${SCALE} > /dev/null
+hadoop fs -ls ${DIR}/${SCALE} > /dev/null
 if [ $? -ne 0 ]; then
 	echo "Data generation failed, exiting."
 	exit 1
@@ -70,6 +70,7 @@ echo "TPC-DS text data generation complete."
 # Create the text/flat tables as external tables. These will be later be converted to ORCFile.
 echo "Loading text data into external tables."
 runcommand "hive -i settings/load-flat.sql -f ddl-tpcds/text/alltables.sql -d DB=tpcds_text_${SCALE} -d LOCATION=${DIR}/${SCALE}"
+runcommand "hive -i settings/load-flat.sql -f ddl-tpcds/parquet/alltables.sql -d DB=tpcds_parquet_${SCALE} -d SOURCE=tpcds_text_${SCALE} "
 
 # Create the partitioned and bucketed tables.
 i=1
