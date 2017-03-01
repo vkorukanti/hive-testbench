@@ -72,6 +72,8 @@ echo "Loading text data into external tables."
 runcommand "hive -i settings/load-flat.sql -f ddl-tpcds/text/alltables.sql -d DB=tpcds_text_${SCALE} -d LOCATION=${DIR}/${SCALE}"
 runcommand "hive -i settings/load-flat.sql -f ddl-tpcds/parquet/alltables.sql -d DB=tpcds_parquet_${SCALE} -d SOURCE=tpcds_text_${SCALE} "
 
+exit 0
+
 # Create the partitioned and bucketed tables.
 i=1
 total=24
